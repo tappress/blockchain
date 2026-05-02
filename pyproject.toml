@@ -1,0 +1,12 @@
+[project]
+name = "cnucoin-labs"
+version = "0.1.0"
+description = "CNUCoin educational cryptocurrency — university blockchain labs"
+requires-python = ">=3.10"
+dependencies = [
+    "cryptography>=42.0",
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.27",
+    "jinja2>=3.1",
+    "python-multipart>=0.0.9",
+]

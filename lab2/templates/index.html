@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8" />
+  <title>CNUCoin — Лабораторна 2</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: #181b22;
+      --panel-2: #1f232c;
+      --line: #2a2f3a;
+      --text: #e6e8ee;
+      --muted: #8a93a6;
+      --accent: #f5a524;
+      --green: #2dd4bf;
+      --red: #f87171;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 24px;
+      font-family: ui-monospace, Menlo, Consolas, monospace;
+      background: var(--bg); color: var(--text);
+    }
+    h1 { margin: 0 0 4px; font-size: 22px; letter-spacing: 0.5px; }
+    h2 { margin: 0 0 12px; font-size: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: 1.2px; }
+    .header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 24px; }
+    .grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 18px; }
+    @media (max-width: 1024px) { .grid { grid-template-columns: 1fr; } }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px 18px;
+      margin-bottom: 18px;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: left; }
+    th { color: var(--muted); font-weight: 500; text-transform: uppercase; font-size: 11px; letter-spacing: 0.8px; }
+    tr:last-child td { border-bottom: none; }
+    code { color: var(--accent); }
+    .muted { color: var(--muted); }
+    form { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    input, select {
+      background: var(--panel-2); color: var(--text);
+      border: 1px solid var(--line); border-radius: 6px;
+      padding: 6px 10px; font: inherit; font-size: 13px;
+    }
+    input[type=number] { width: 110px; }
+    button {
+      background: var(--accent); color: #1a1300; border: 0;
+      padding: 6px 14px; border-radius: 6px; cursor: pointer; font: inherit; font-weight: 600; font-size: 12px;
+    }
+    button.secondary { background: var(--panel-2); color: var(--text); border: 1px solid var(--line); font-weight: 500; }
+    button.danger { background: var(--red); color: #2a0000; }
+    .badge { display: inline-block; padding: 1px 7px; border-radius: 999px; font-size: 11px; }
+    .badge.miner { background: #3a2a05; color: var(--accent); }
+    .badge.ok { background: #0d3d36; color: var(--green); }
+    .badge.pending { background: #3a1f1f; color: var(--red); }
+    .badge.mined { background: #3a2a05; color: var(--accent); }
+    .flash { padding: 10px 14px; border-radius: 6px; margin-bottom: 18px; font-size: 13px; }
+    .flash.ok { background: #0d3d36; color: var(--green); border: 1px solid #135449; }
+    .flash.err { background: #3d1313; color: var(--red); border: 1px solid #5a1f1f; }
+    label.checkbox { display: inline-flex; gap: 6px; align-items: center; color: var(--muted); }
+    .row-actions form { display: inline-flex; margin-right: 6px; }
+    form.inline-rename { gap: 4px; }
+    form.inline-rename input { width: 110px; padding: 4px 8px; font-size: 12px; }
+    form.inline-rename button { padding: 4px 8px; font-size: 12px; }
+    .small { font-size: 11px; color: var(--muted); }
+    summary { cursor: pointer; color: var(--muted); margin-bottom: 8px; }
+    .balance { color: var(--green); font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div>
+      <h1>CNUCoin</h1>
+      <div class="muted">Лабораторна робота № 2 — Proof-of-Work майнінг та підтвердження транзакцій</div>
+    </div>
+    <form method="post" action="/reset" onsubmit="return confirm('Скинути всю базу даних?');">
+      <button class="danger" type="submit">Reset DB</button>
+    </form>
+  </div>
+
+  <div class="panel" style="border-color: var(--accent);">
+    <h2>⛏ Майнінг наступного блоку</h2>
+    {% if miners and pending_count > 0 %}
+    <form method="post" action="/mine">
+      <select name="miner_id" required>
+        <option value="">Майнер…</option>
+        {% for m in miners %}
+          <option value="{{ m.id }}">{{ m.label or m.id|short(14) }}</option>
+        {% endfor %}
+      </select>
+      <label class="checkbox">Difficulty:
+        <input type="number" name="difficulty" value="{{ difficulty }}" min="1" max="6" style="width:60px;" />
+      </label>
+      <button type="submit">⛏ Mine next ({{ pending_count }} pending)</button>
+    </form>
+    <div class="small" style="margin-top:8px">
+      Бере найстарішу непідтверджену транзакцію та шукає Nonce, при якому
+      MD5(TAHash || prev_BlockChainHash || Nonce) починається з {{ difficulty }} нуля(-ів).
+      Підтверджує транзакцію попереднього блоку та виплачує винагороду його майнеру.
+    </div>
+    {% elif not miners %}
+      <div class="muted">Немає зареєстрованих майнерів. Спочатку зареєструйте учасника з ☑ майнер.</div>
+    {% else %}
+      <div class="muted">Немає непідтверджених транзакцій для майнінгу.</div>
+    {% endif %}
+  </div>
+
+  {% if message %}<div class="flash ok">{{ message }}</div>{% endif %}
+  {% if error %}<div class="flash err">{{ error }}</div>{% endif %}
+
+  <div class="grid">
+    <div>
+      <div class="panel">
+        <h2>Учасники ({{ members|length }})</h2>
+        <table>
+          <thead>
+            <tr><th>Назва</th><th>ID (CNUCoinID)</th><th>Тип</th><th>Баланс</th></tr>
+          </thead>
+          <tbody>
+          {% for m in members %}
+            <tr>
+              <td>
+                <form method="post" action="/users/{{ m.id }}/label" accept-charset="utf-8" class="inline-rename">
+                  <input type="text" name="label" value="{{ m.label or '' }}" placeholder="без назви" maxlength="40" />
+                  <button class="secondary" type="submit" title="Зберегти назву">✎</button>
+                </form>
+              </td>
+              <td><code title="{{ m.id }}">{{ m.id|short(14) }}</code></td>
+              <td>
+                {% if m.is_miner %}<span class="badge miner">miner</span>{% else %}<span class="muted">user</span>{% endif %}
+              </td>
+              <td class="balance">{{ '%.2f'|format(m.balance) }}</td>
+            </tr>
+          {% else %}
+            <tr><td colspan="4" class="muted">Ще немає зареєстрованих учасників.</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <h2>Зареєструвати нового учасника</h2>
+        <form method="post" action="/users" accept-charset="utf-8">
+          <input type="text" name="label" placeholder="Назва (напр. Alice)" maxlength="40" />
+          <label class="checkbox"><input type="checkbox" name="is_miner" /> майнер</label>
+          <input type="number" step="0.01" min="0" name="initial_balance" placeholder="Баланс" value="100" />
+          <button type="submit">Створити</button>
+        </form>
+        <div class="small" style="margin-top:8px">
+          Згенерує RSA-2048 ключі, обчислить ID = MD5(PublicKey), запише у відкритий реєстр та приватну таблицю.
+          Початковий баланс оформляється як автопідтверджена транзакція від System Genesis.
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Нова транзакція</h2>
+        {% if members|length >= 2 %}
+        <form method="post" action="/transactions">
+          <select name="sender" required>
+            <option value="">Відправник…</option>
+            {% for m in members %}
+              <option value="{{ m.id }}">{{ m.label or m.id|short(14) }} ({{ '%.2f'|format(m.balance) }})</option>
+            {% endfor %}
+          </select>
+          <select name="recipient" required>
+            <option value="">Отримувач…</option>
+            {% for m in members %}
+              <option value="{{ m.id }}">{{ m.label or m.id|short(14) }}</option>
+            {% endfor %}
+          </select>
+          <input type="number" step="0.01" min="0.01" name="amount" placeholder="Сума" required />
+          <button type="submit">Надіслати</button>
+        </form>
+        {% else %}
+          <div class="muted">Потрібно щонайменше двох учасників.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div>
+      <div class="panel">
+        <h2>Транзакції ({{ transactions|length }})</h2>
+        <table>
+          <thead>
+            <tr><th>TAID</th><th>From → To</th><th>Сума</th><th>TAHash</th><th>Стан</th><th>Nonce</th><th></th></tr>
+          </thead>
+          <tbody>
+          {% for tx in transactions %}
+            <tr>
+              <td>#{{ tx.TAID }}</td>
+              <td>
+                <span title="{{ tx['From'] }}">{{ labels.get(tx['From']) or tx['From']|short(8) }}</span>
+                →
+                <span title="{{ tx['To'] }}">{{ labels.get(tx['To']) or tx['To']|short(8) }}</span>
+              </td>
+              <td>{{ '%.2f'|format(tx.TASum) }}</td>
+              <td title="{{ tx.TAHash }}"><code>{{ tx.TAHash[:14] }}…</code></td>
+              <td>
+                {% if tx.status == "approved" %}
+                  <span class="badge ok">approved</span>
+                {% elif tx.status == "mined" %}
+                  <span class="badge mined">mined (waiting next block)</span>
+                {% else %}
+                  <span class="badge pending">pending</span>
+                {% endif %}
+              </td>
+              <td>{% if tx.Nonce %}{{ tx.Nonce }}{% else %}<span class="muted">—</span>{% endif %}</td>
+              <td class="row-actions">
+                <a href="/transactions/{{ tx.TAID }}/verify"><button class="secondary" type="button">Verify</button></a>
+              </td>
+            </tr>
+          {% else %}
+            <tr><td colspan="7" class="muted">Транзакцій поки немає.</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <h2>Блокчейн ({{ blocks|length }})</h2>
+        <table>
+          <thead>
+            <tr><th>#</th><th>Miner</th><th>BlockChainHash</th><th>Nonce</th><th>TAID</th><th></th></tr>
+          </thead>
+          <tbody>
+          {% for b in blocks %}
+            <tr>
+              <td>{{ b.BlockID }}</td>
+              <td>
+                {% if b.MinerID %}
+                  <span title="{{ b.MinerID }}">{{ labels.get(b.MinerID) or b.MinerID|short(10) }}</span>
+                {% else %}<span class="muted">—</span>{% endif %}
+              </td>
+              <td title="{{ b.BlockChainHash }}"><code>{{ b.BlockChainHash[:14] }}…</code></td>
+              <td>{{ b.Nonce }}</td>
+              <td>#{{ b.TAID }}</td>
+              <td><a href="/blocks/{{ b.BlockID }}/verify"><button class="secondary" type="button">Verify</button></a></td>
+            </tr>
+          {% else %}
+            <tr><td colspan="6" class="muted">Блоків ще немає.</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <details>
+          <summary>Журнал гаманців ({{ wallet|length }})</summary>
+          <table>
+            <thead><tr><th>Власник</th><th>From</th><th>To</th><th>Сума</th><th>Дата</th></tr></thead>
+            <tbody>
+              {% for w in wallet %}
+              <tr>
+                <td title="{{ w.CNUCoinID }}">{{ labels.get(w.CNUCoinID) or w.CNUCoinID|short(10) }}</td>
+                <td title="{{ w['From'] }}">{{ labels.get(w['From']) or w['From']|short(10) }}</td>
+                <td title="{{ w['To'] }}">{{ labels.get(w['To']) or w['To']|short(10) }}</td>
+                <td>{{ '%.2f'|format(w.TASum) }}</td>
+                <td class="small">{{ w.TADate }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </details>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
