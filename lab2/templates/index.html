@@ -2,270 +2,578 @@
 <html lang="uk">
 <head>
   <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>CNUCoin — Лабораторна 2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0f1115;
-      --panel: #181b22;
-      --panel-2: #1f232c;
-      --line: #2a2f3a;
-      --text: #e6e8ee;
-      --muted: #8a93a6;
-      --accent: #f5a524;
-      --green: #2dd4bf;
-      --red: #f87171;
+      --bg-base: #07090f;
+      --bg-grad-1: #0c1220;
+      --bg-grad-2: #0a0d18;
+      --panel: rgba(20, 26, 42, 0.65);
+      --panel-solid: #141a2a;
+      --panel-hover: rgba(28, 36, 56, 0.75);
+      --elev: #1a2238;
+      --line: rgba(99, 116, 156, 0.18);
+      --line-strong: rgba(99, 116, 156, 0.32);
+      --text: #e8ecf5;
+      --text-soft: #b4bdd1;
+      --muted: #6f7a96;
+      --accent: #fb923c;
+      --accent-2: #f59e0b;
+      --green: #34d399;
+      --green-soft: rgba(52, 211, 153, 0.12);
+      --cyan: #22d3ee;
+      --red: #fb7185;
+      --violet: #a78bfa;
+      --blue: #60a5fa;
     }
     * { box-sizing: border-box; }
+    html, body { height: 100%; }
     body {
-      margin: 0; padding: 24px;
-      font-family: ui-monospace, Menlo, Consolas, monospace;
-      background: var(--bg); color: var(--text);
+      margin: 0;
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--text);
+      background:
+        radial-gradient(1200px 600px at 85% -10%, rgba(251, 146, 60, 0.10), transparent 60%),
+        radial-gradient(900px 500px at -10% 10%, rgba(96, 165, 250, 0.06), transparent 55%),
+        radial-gradient(700px 400px at 50% 110%, rgba(167, 139, 250, 0.05), transparent 60%),
+        linear-gradient(180deg, var(--bg-grad-1) 0%, var(--bg-base) 100%);
+      background-attachment: fixed;
+      -webkit-font-smoothing: antialiased;
     }
-    h1 { margin: 0 0 4px; font-size: 22px; letter-spacing: 0.5px; }
-    h2 { margin: 0 0 12px; font-size: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: 1.2px; }
-    .header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 24px; }
-    .grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 18px; }
-    @media (max-width: 1024px) { .grid { grid-template-columns: 1fr; } }
+    code, .mono { font-family: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace; }
+
+    /* ---------- Layout ---------- */
+    .topbar {
+      position: sticky; top: 0; z-index: 50;
+      backdrop-filter: blur(14px);
+      background: rgba(10, 13, 24, 0.72);
+      border-bottom: 1px solid var(--line);
+    }
+    .topbar-inner {
+      max-width: 1320px; margin: 0 auto;
+      padding: 14px 28px;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .logo {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+      display: grid; place-items: center;
+      box-shadow: 0 4px 16px -2px rgba(251, 146, 60, 0.5), inset 0 1px 0 rgba(255,255,255,0.2);
+      color: #1a0e00; font-weight: 800; font-size: 18px;
+    }
+    .brand-text { line-height: 1.2; }
+    .brand-name { font-weight: 700; font-size: 15px; letter-spacing: -0.01em; }
+    .brand-sub { font-size: 11px; color: var(--muted); font-weight: 500; }
+    .topbar-meta { display: flex; align-items: center; gap: 10px; }
+    .chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 11px; border-radius: 999px;
+      background: rgba(28, 36, 56, 0.6);
+      border: 1px solid var(--line);
+      font-size: 11.5px; font-weight: 500; color: var(--text-soft);
+    }
+    .chip .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); }
+    .chip.warn .dot { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+    .chip.warn { color: var(--accent); border-color: rgba(251, 146, 60, 0.3); }
+
+    main { max-width: 1320px; margin: 0 auto; padding: 28px; }
+
+    /* ---------- Hero ---------- */
+    .hero {
+      display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 16px;
+      margin-bottom: 24px;
+    }
+    .hero h1 {
+      margin: 0 0 6px; font-size: 28px; font-weight: 700; letter-spacing: -0.02em;
+      background: linear-gradient(180deg, #fff 0%, #c8d1e6 100%);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .hero-sub { color: var(--muted); font-size: 13.5px; max-width: 640px; }
+
+    /* ---------- Stat cards ---------- */
+    .stats {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 900px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+    .stat {
+      position: relative; overflow: hidden;
+      padding: 16px 18px; border-radius: 14px;
+      background: linear-gradient(180deg, rgba(28, 36, 56, 0.55) 0%, rgba(20, 26, 42, 0.55) 100%);
+      border: 1px solid var(--line);
+    }
+    .stat::before {
+      content: ""; position: absolute; inset: 0; border-radius: 14px; pointer-events: none;
+      background: radial-gradient(400px 80px at 50% -20%, rgba(251, 146, 60, 0.08), transparent 70%);
+    }
+    .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; }
+    .stat-value { font-size: 26px; font-weight: 700; margin-top: 6px; letter-spacing: -0.02em; }
+    .stat-value .accent { color: var(--accent); }
+    .stat-value .green { color: var(--green); }
+    .stat-value .cyan { color: var(--cyan); }
+    .stat-value .red { color: var(--red); }
+    .stat-foot { font-size: 11.5px; color: var(--muted); margin-top: 4px; }
+
+    /* ---------- Mining hero ---------- */
+    .mine-hero {
+      position: relative; overflow: hidden;
+      border-radius: 16px;
+      padding: 20px 22px;
+      margin-bottom: 24px;
+      background:
+        radial-gradient(800px 220px at 100% 0%, rgba(251, 146, 60, 0.18), transparent 60%),
+        radial-gradient(500px 200px at 0% 100%, rgba(167, 139, 250, 0.12), transparent 60%),
+        linear-gradient(180deg, rgba(34, 24, 12, 0.45) 0%, rgba(20, 26, 42, 0.6) 100%);
+      border: 1px solid rgba(251, 146, 60, 0.28);
+      box-shadow: 0 0 0 1px rgba(251, 146, 60, 0.08), 0 18px 60px -24px rgba(251, 146, 60, 0.35);
+    }
+    .mine-hero::before {
+      content: ""; position: absolute; top: -1px; left: -1px; right: -1px; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(251, 146, 60, 0.6), transparent);
+    }
+    .mine-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+    .mine-icon { width: 32px; height: 32px; border-radius: 9px; background: rgba(251, 146, 60, 0.18); border: 1px solid rgba(251, 146, 60, 0.3); display: grid; place-items: center; color: var(--accent); font-size: 16px; }
+    .mine-title { font-weight: 700; font-size: 15px; color: #fff; letter-spacing: -0.01em; }
+    .mine-sub { font-size: 12px; color: var(--text-soft); margin-left: auto; }
+    .mine-sub strong { color: var(--accent); font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+    .pulse-dot {
+      display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+      background: var(--accent); margin-right: 6px;
+      animation: pulse-ring 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse-ring {
+      0%,100% { box-shadow: 0 0 0 0 rgba(251, 146, 60, 0.6); opacity: 1; }
+      50% { box-shadow: 0 0 0 8px rgba(251, 146, 60, 0); opacity: 0.85; }
+    }
+
+    /* ---------- Grid ---------- */
+    .grid { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 20px; }
+    @media (max-width: 1100px) { .grid { grid-template-columns: 1fr; } }
+
+    /* ---------- Panels ---------- */
     .panel {
       background: var(--panel);
       border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 16px 18px;
+      border-radius: 14px;
+      backdrop-filter: blur(10px);
       margin-bottom: 18px;
+      overflow: hidden;
+      transition: border-color .2s ease;
     }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    th, td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: left; }
-    th { color: var(--muted); font-weight: 500; text-transform: uppercase; font-size: 11px; letter-spacing: 0.8px; }
-    tr:last-child td { border-bottom: none; }
-    code { color: var(--accent); }
-    .muted { color: var(--muted); }
-    form { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-    input, select {
-      background: var(--panel-2); color: var(--text);
-      border: 1px solid var(--line); border-radius: 6px;
-      padding: 6px 10px; font: inherit; font-size: 13px;
+    .panel:hover { border-color: var(--line-strong); }
+    .panel-head {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      padding: 14px 18px 12px;
+      border-bottom: 1px solid var(--line);
     }
-    input[type=number] { width: 110px; }
+    .panel-title { font-size: 12.5px; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.12em; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+    .panel-title .count { background: rgba(99, 116, 156, 0.18); color: var(--text-soft); padding: 2px 8px; border-radius: 999px; font-size: 11px; letter-spacing: 0; text-transform: none; font-weight: 600; }
+    .panel-body { padding: 14px 18px 16px; }
+    .panel-body.flush { padding: 0; }
+
+    /* ---------- Tables ---------- */
+    .tbl { width: 100%; border-collapse: collapse; }
+    .tbl th, .tbl td {
+      padding: 11px 18px;
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+      font-size: 13px;
+    }
+    .tbl th {
+      color: var(--muted); font-weight: 600; text-transform: uppercase; font-size: 10.5px; letter-spacing: 0.1em;
+      background: rgba(10, 13, 24, 0.4);
+    }
+    .tbl tr:last-child td { border-bottom: none; }
+    .tbl tbody tr { transition: background .15s ease; }
+    .tbl tbody tr:hover { background: rgba(99, 116, 156, 0.05); }
+    .tbl td.muted, .muted { color: var(--muted); }
+    .tbl .empty { text-align: center; padding: 28px; color: var(--muted); font-size: 13px; }
+
+    /* ---------- Form elements ---------- */
+    .form { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    input[type=text], input[type=number], select {
+      background: rgba(10, 13, 24, 0.65);
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 9px 12px;
+      font: inherit; font-size: 13px;
+      transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+      outline: none;
+    }
+    input[type=text]:focus, input[type=number]:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(251, 146, 60, 0.15);
+    }
+    input[type=number] { width: 120px; }
+    input::placeholder { color: var(--muted); }
+    select { padding-right: 30px; appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%); background-position: calc(100% - 16px) 50%, calc(100% - 11px) 50%; background-size: 5px 5px, 5px 5px; background-repeat: no-repeat; }
+
     button {
-      background: var(--accent); color: #1a1300; border: 0;
-      padding: 6px 14px; border-radius: 6px; cursor: pointer; font: inherit; font-weight: 600; font-size: 12px;
+      background: linear-gradient(180deg, var(--accent) 0%, var(--accent-2) 100%);
+      color: #1a0e00; border: 0;
+      padding: 9px 16px; border-radius: 8px;
+      cursor: pointer; font: inherit; font-weight: 600; font-size: 13px;
+      transition: transform .1s ease, box-shadow .15s ease, filter .15s ease;
+      box-shadow: 0 4px 12px -4px rgba(251, 146, 60, 0.45), inset 0 1px 0 rgba(255,255,255,0.18);
     }
-    button.secondary { background: var(--panel-2); color: var(--text); border: 1px solid var(--line); font-weight: 500; }
-    button.danger { background: var(--red); color: #2a0000; }
-    .badge { display: inline-block; padding: 1px 7px; border-radius: 999px; font-size: 11px; }
-    .badge.miner { background: #3a2a05; color: var(--accent); }
-    .badge.ok { background: #0d3d36; color: var(--green); }
-    .badge.pending { background: #3a1f1f; color: var(--red); }
-    .badge.mined { background: #3a2a05; color: var(--accent); }
-    .flash { padding: 10px 14px; border-radius: 6px; margin-bottom: 18px; font-size: 13px; }
-    .flash.ok { background: #0d3d36; color: var(--green); border: 1px solid #135449; }
-    .flash.err { background: #3d1313; color: var(--red); border: 1px solid #5a1f1f; }
-    label.checkbox { display: inline-flex; gap: 6px; align-items: center; color: var(--muted); }
-    .row-actions form { display: inline-flex; margin-right: 6px; }
-    form.inline-rename { gap: 4px; }
-    form.inline-rename input { width: 110px; padding: 4px 8px; font-size: 12px; }
-    form.inline-rename button { padding: 4px 8px; font-size: 12px; }
-    .small { font-size: 11px; color: var(--muted); }
-    summary { cursor: pointer; color: var(--muted); margin-bottom: 8px; }
-    .balance { color: var(--green); font-weight: 600; }
+    button:hover { filter: brightness(1.08); box-shadow: 0 6px 18px -4px rgba(251, 146, 60, 0.55), inset 0 1px 0 rgba(255,255,255,0.18); }
+    button:active { transform: translateY(1px); }
+    button.secondary {
+      background: rgba(28, 36, 56, 0.7); color: var(--text-soft);
+      border: 1px solid var(--line);
+      font-weight: 500; box-shadow: none;
+    }
+    button.secondary:hover { background: var(--panel-hover); color: var(--text); border-color: var(--line-strong); filter: none; }
+    button.ghost { background: transparent; border: 1px solid var(--line); color: var(--text-soft); box-shadow: none; }
+    button.ghost:hover { background: rgba(28, 36, 56, 0.5); color: var(--text); filter: none; }
+    button.danger {
+      background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%);
+      color: #fff;
+      box-shadow: 0 4px 12px -4px rgba(239, 68, 68, 0.45), inset 0 1px 0 rgba(255,255,255,0.15);
+    }
+    button.mine-big {
+      padding: 11px 22px; font-size: 14px; font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+    button.sm { padding: 6px 10px; font-size: 12px; border-radius: 7px; }
+
+    label.checkbox { display: inline-flex; gap: 8px; align-items: center; color: var(--text-soft); font-size: 13px; user-select: none; cursor: pointer; }
+    label.checkbox input { accent-color: var(--accent); width: 14px; height: 14px; }
+
+    /* ---------- Badges ---------- */
+    .badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 9px; border-radius: 999px;
+      font-size: 11px; font-weight: 600; letter-spacing: 0.02em;
+      border: 1px solid transparent;
+    }
+    .badge .b-dot { width: 5px; height: 5px; border-radius: 50%; }
+    .badge.miner { background: rgba(251, 146, 60, 0.12); color: var(--accent); border-color: rgba(251, 146, 60, 0.3); }
+    .badge.miner .b-dot { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+    .badge.user { background: rgba(99, 116, 156, 0.12); color: var(--muted); border-color: rgba(99, 116, 156, 0.25); }
+    .badge.ok { background: var(--green-soft); color: var(--green); border-color: rgba(52, 211, 153, 0.3); }
+    .badge.ok .b-dot { background: var(--green); box-shadow: 0 0 6px var(--green); }
+    .badge.pending { background: rgba(251, 113, 133, 0.1); color: var(--red); border-color: rgba(251, 113, 133, 0.28); }
+    .badge.pending .b-dot { background: var(--red); animation: pulse 1.6s ease-in-out infinite; }
+    .badge.mined { background: rgba(251, 146, 60, 0.1); color: var(--accent); border-color: rgba(251, 146, 60, 0.25); }
+    .badge.mined .b-dot { background: var(--accent); animation: pulse 1.6s ease-in-out infinite; }
+    @keyframes pulse {
+      0%,100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* ---------- Hash / ID display ---------- */
+    .hash {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 12px; color: var(--accent);
+      padding: 2px 7px; border-radius: 5px;
+      background: rgba(251, 146, 60, 0.07);
+      border: 1px solid rgba(251, 146, 60, 0.15);
+      transition: background .15s ease;
+    }
+    .hash:hover { background: rgba(251, 146, 60, 0.14); }
+    .hash.green { color: var(--green); background: rgba(52, 211, 153, 0.07); border-color: rgba(52, 211, 153, 0.18); }
+    .id-mono {
+      font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-soft);
+    }
+    .id-mono.dim { color: var(--muted); }
+    .balance { font-family: 'JetBrains Mono', monospace; color: var(--green); font-weight: 600; }
+    .arrow { color: var(--muted); margin: 0 6px; font-size: 11px; }
+
+    /* ---------- Flash ---------- */
+    .flash {
+      padding: 12px 16px; border-radius: 10px; margin-bottom: 18px; font-size: 13px;
+      display: flex; align-items: center; gap: 10px;
+      animation: slide-in .25s ease;
+      word-break: break-word;
+    }
+    @keyframes slide-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+    .flash.ok { background: linear-gradient(180deg, rgba(52, 211, 153, 0.1), rgba(52, 211, 153, 0.04)); color: var(--green); border: 1px solid rgba(52, 211, 153, 0.25); }
+    .flash.err { background: linear-gradient(180deg, rgba(251, 113, 133, 0.1), rgba(251, 113, 133, 0.04)); color: var(--red); border: 1px solid rgba(251, 113, 133, 0.25); }
+
+    /* ---------- Inline rename ---------- */
+    .inline-rename { gap: 4px; }
+    .inline-rename input { padding: 5px 9px; font-size: 12.5px; width: 140px; }
+    .inline-rename button { padding: 5px 9px; font-size: 12px; }
+    .row-actions { display: flex; align-items: center; gap: 6px; }
+    .row-actions form { display: inline-flex; }
+
+    /* ---------- Misc ---------- */
+    .small { font-size: 11.5px; color: var(--muted); }
+    .help { margin-top: 10px; padding: 10px 12px; border-radius: 8px; background: rgba(10, 13, 24, 0.5); border: 1px solid var(--line); font-size: 12px; color: var(--text-soft); line-height: 1.55; }
+    summary { cursor: pointer; color: var(--text-soft); padding: 8px 0; font-size: 13px; }
+    summary:hover { color: var(--text); }
+    .footer { margin-top: 36px; padding: 18px 0; text-align: center; color: var(--muted); font-size: 12px; border-top: 1px solid var(--line); }
   </style>
 </head>
 <body>
-  <div class="header">
-    <div>
-      <h1>CNUCoin</h1>
-      <div class="muted">Лабораторна робота № 2 — Proof-of-Work майнінг та підтвердження транзакцій</div>
-    </div>
-    <form method="post" action="/reset" onsubmit="return confirm('Скинути всю базу даних?');">
-      <button class="danger" type="submit">Reset DB</button>
-    </form>
-  </div>
-
-  <div class="panel" style="border-color: var(--accent);">
-    <h2>⛏ Майнінг наступного блоку</h2>
-    {% if miners and pending_count > 0 %}
-    <form method="post" action="/mine">
-      <select name="miner_id" required>
-        <option value="">Майнер…</option>
-        {% for m in miners %}
-          <option value="{{ m.id }}">{{ m.label or m.id|short(14) }}</option>
-        {% endfor %}
-      </select>
-      <label class="checkbox">Difficulty:
-        <input type="number" name="difficulty" value="{{ difficulty }}" min="1" max="6" style="width:60px;" />
-      </label>
-      <button type="submit">⛏ Mine next ({{ pending_count }} pending)</button>
-    </form>
-    <div class="small" style="margin-top:8px">
-      Бере найстарішу непідтверджену транзакцію та шукає Nonce, при якому
-      MD5(TAHash || prev_BlockChainHash || Nonce) починається з {{ difficulty }} нуля(-ів).
-      Підтверджує транзакцію попереднього блоку та виплачує винагороду його майнеру.
-    </div>
-    {% elif not miners %}
-      <div class="muted">Немає зареєстрованих майнерів. Спочатку зареєструйте учасника з ☑ майнер.</div>
-    {% else %}
-      <div class="muted">Немає непідтверджених транзакцій для майнінгу.</div>
-    {% endif %}
-  </div>
-
-  {% if message %}<div class="flash ok">{{ message }}</div>{% endif %}
-  {% if error %}<div class="flash err">{{ error }}</div>{% endif %}
-
-  <div class="grid">
-    <div>
-      <div class="panel">
-        <h2>Учасники ({{ members|length }})</h2>
-        <table>
-          <thead>
-            <tr><th>Назва</th><th>ID (CNUCoinID)</th><th>Тип</th><th>Баланс</th></tr>
-          </thead>
-          <tbody>
-          {% for m in members %}
-            <tr>
-              <td>
-                <form method="post" action="/users/{{ m.id }}/label" accept-charset="utf-8" class="inline-rename">
-                  <input type="text" name="label" value="{{ m.label or '' }}" placeholder="без назви" maxlength="40" />
-                  <button class="secondary" type="submit" title="Зберегти назву">✎</button>
-                </form>
-              </td>
-              <td><code title="{{ m.id }}">{{ m.id|short(14) }}</code></td>
-              <td>
-                {% if m.is_miner %}<span class="badge miner">miner</span>{% else %}<span class="muted">user</span>{% endif %}
-              </td>
-              <td class="balance">{{ '%.2f'|format(m.balance) }}</td>
-            </tr>
-          {% else %}
-            <tr><td colspan="4" class="muted">Ще немає зареєстрованих учасників.</td></tr>
-          {% endfor %}
-          </tbody>
-        </table>
-      </div>
-
-      <div class="panel">
-        <h2>Зареєструвати нового учасника</h2>
-        <form method="post" action="/users" accept-charset="utf-8">
-          <input type="text" name="label" placeholder="Назва (напр. Alice)" maxlength="40" />
-          <label class="checkbox"><input type="checkbox" name="is_miner" /> майнер</label>
-          <input type="number" step="0.01" min="0" name="initial_balance" placeholder="Баланс" value="100" />
-          <button type="submit">Створити</button>
-        </form>
-        <div class="small" style="margin-top:8px">
-          Згенерує RSA-2048 ключі, обчислить ID = MD5(PublicKey), запише у відкритий реєстр та приватну таблицю.
-          Початковий баланс оформляється як автопідтверджена транзакція від System Genesis.
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="logo">₡</div>
+        <div class="brand-text">
+          <div class="brand-name">CNUCoin</div>
+          <div class="brand-sub">Лабораторна № 2 · Proof-of-Work майнінг</div>
         </div>
       </div>
+      <div class="topbar-meta">
+        <span class="chip"><span class="dot"></span> CNUCoin Devnet</span>
+        <span class="chip warn"><span class="dot"></span> Difficulty {{ difficulty }}</span>
+        <span class="chip">RSA-2048 · MD5</span>
+        <form method="post" action="/reset" onsubmit="return confirm('Скинути всю базу даних?');">
+          <button class="ghost sm" type="submit">Reset DB</button>
+        </form>
+      </div>
+    </div>
+  </header>
 
-      <div class="panel">
-        <h2>Нова транзакція</h2>
-        {% if members|length >= 2 %}
-        <form method="post" action="/transactions">
-          <select name="sender" required>
-            <option value="">Відправник…</option>
-            {% for m in members %}
-              <option value="{{ m.id }}">{{ m.label or m.id|short(14) }} ({{ '%.2f'|format(m.balance) }})</option>
-            {% endfor %}
-          </select>
-          <select name="recipient" required>
-            <option value="">Отримувач…</option>
-            {% for m in members %}
+  <main>
+    <section class="hero">
+      <div>
+        <h1>Proof-of-Work ланцюг транзакцій</h1>
+        <div class="hero-sub">Майнери підбирають Nonce, при якому MD5 нового блоку починається з заданої кількості нулів. Транзакція вважається підтвердженою лише після того, як <em>наступний</em> блок ляже зверху — так само, як це працює в Bitcoin.</div>
+      </div>
+    </section>
+
+    <section class="stats">
+      <div class="stat">
+        <div class="stat-label">Учасники</div>
+        <div class="stat-value">{{ members|length }}</div>
+        <div class="stat-foot">{% set miners = members|selectattr('is_miner')|list %}{{ miners|length }} майнер(ів)</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Транзакції</div>
+        <div class="stat-value">{{ transactions|length }}</div>
+        <div class="stat-foot">записів у реєстрі</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Очікують</div>
+        <div class="stat-value"><span class="{% if pending_count > 0 %}red{% else %}green{% endif %}">{{ pending_count }}</span></div>
+        <div class="stat-foot">поза ланцюгом</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Блоки</div>
+        <div class="stat-value"><span class="accent">{{ blocks|length }}</span></div>
+        <div class="stat-foot">довжина ланцюга</div>
+      </div>
+    </section>
+
+    <section class="mine-hero">
+      <div class="mine-head">
+        <div class="mine-icon">⛏</div>
+        <div class="mine-title">Майнінг наступного блоку</div>
+        <div class="mine-sub">target: MD5 починається з <strong>{{ '0' * difficulty }}</strong></div>
+      </div>
+      {% if miners and pending_count > 0 %}
+        <form method="post" action="/mine" class="form">
+          <select name="miner_id" required>
+            <option value="">Виберіть майнера…</option>
+            {% for m in miners %}
               <option value="{{ m.id }}">{{ m.label or m.id|short(14) }}</option>
             {% endfor %}
           </select>
-          <input type="number" step="0.01" min="0.01" name="amount" placeholder="Сума" required />
-          <button type="submit">Надіслати</button>
+          <label class="checkbox" style="background: rgba(10,13,24,0.5); padding: 6px 12px; border-radius: 8px; border: 1px solid var(--line);">
+            <span style="color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em;">Difficulty</span>
+            <input type="number" name="difficulty" value="{{ difficulty }}" min="1" max="6" style="width:60px; padding: 4px 8px;" />
+          </label>
+          <button class="mine-big" type="submit"><span class="pulse-dot"></span>Mine next block ({{ pending_count }} pending)</button>
         </form>
-        {% else %}
-          <div class="muted">Потрібно щонайменше двох учасників.</div>
-        {% endif %}
-      </div>
-    </div>
+        <div class="help" style="margin-top: 14px;">Бере найстарішу непідтверджену транзакцію та шукає Nonce, при якому <code style="color: var(--accent);">MD5(TAHash || prev_BlockChainHash || Nonce)</code> починається з {{ difficulty }} нуля(-ів). Підтверджує транзакцію <em>попереднього</em> блоку та виплачує винагороду його майнеру.</div>
+      {% elif not miners %}
+        <div class="muted" style="padding: 8px 0;">⚠ Немає зареєстрованих майнерів. Спочатку зареєструйте учасника з ☑ майнер.</div>
+      {% else %}
+        <div class="muted" style="padding: 8px 0; display: flex; align-items: center; gap: 8px;"><span style="color: var(--green); font-size: 16px;">✓</span> Усі транзакції підтверджені — майнити нема чого.</div>
+      {% endif %}
+    </section>
 
-    <div>
-      <div class="panel">
-        <h2>Транзакції ({{ transactions|length }})</h2>
-        <table>
-          <thead>
-            <tr><th>TAID</th><th>From → To</th><th>Сума</th><th>TAHash</th><th>Стан</th><th>Nonce</th><th></th></tr>
-          </thead>
-          <tbody>
-          {% for tx in transactions %}
-            <tr>
-              <td>#{{ tx.TAID }}</td>
-              <td>
-                <span title="{{ tx['From'] }}">{{ labels.get(tx['From']) or tx['From']|short(8) }}</span>
-                →
-                <span title="{{ tx['To'] }}">{{ labels.get(tx['To']) or tx['To']|short(8) }}</span>
-              </td>
-              <td>{{ '%.2f'|format(tx.TASum) }}</td>
-              <td title="{{ tx.TAHash }}"><code>{{ tx.TAHash[:14] }}…</code></td>
-              <td>
-                {% if tx.status == "approved" %}
-                  <span class="badge ok">approved</span>
-                {% elif tx.status == "mined" %}
-                  <span class="badge mined">mined (waiting next block)</span>
-                {% else %}
-                  <span class="badge pending">pending</span>
-                {% endif %}
-              </td>
-              <td>{% if tx.Nonce %}{{ tx.Nonce }}{% else %}<span class="muted">—</span>{% endif %}</td>
-              <td class="row-actions">
-                <a href="/transactions/{{ tx.TAID }}/verify"><button class="secondary" type="button">Verify</button></a>
-              </td>
-            </tr>
-          {% else %}
-            <tr><td colspan="7" class="muted">Транзакцій поки немає.</td></tr>
-          {% endfor %}
-          </tbody>
-        </table>
-      </div>
+    {% if message %}<div class="flash ok"><span>✓</span><span>{{ message }}</span></div>{% endif %}
+    {% if error %}<div class="flash err"><span>!</span><span>{{ error }}</span></div>{% endif %}
 
-      <div class="panel">
-        <h2>Блокчейн ({{ blocks|length }})</h2>
-        <table>
-          <thead>
-            <tr><th>#</th><th>Miner</th><th>BlockChainHash</th><th>Nonce</th><th>TAID</th><th></th></tr>
-          </thead>
-          <tbody>
-          {% for b in blocks %}
-            <tr>
-              <td>{{ b.BlockID }}</td>
-              <td>
-                {% if b.MinerID %}
-                  <span title="{{ b.MinerID }}">{{ labels.get(b.MinerID) or b.MinerID|short(10) }}</span>
-                {% else %}<span class="muted">—</span>{% endif %}
-              </td>
-              <td title="{{ b.BlockChainHash }}"><code>{{ b.BlockChainHash[:14] }}…</code></td>
-              <td>{{ b.Nonce }}</td>
-              <td>#{{ b.TAID }}</td>
-              <td><a href="/blocks/{{ b.BlockID }}/verify"><button class="secondary" type="button">Verify</button></a></td>
-            </tr>
-          {% else %}
-            <tr><td colspan="6" class="muted">Блоків ще немає.</td></tr>
-          {% endfor %}
-          </tbody>
-        </table>
-      </div>
-
-      <div class="panel">
-        <details>
-          <summary>Журнал гаманців ({{ wallet|length }})</summary>
-          <table>
-            <thead><tr><th>Власник</th><th>From</th><th>To</th><th>Сума</th><th>Дата</th></tr></thead>
-            <tbody>
-              {% for w in wallet %}
-              <tr>
-                <td title="{{ w.CNUCoinID }}">{{ labels.get(w.CNUCoinID) or w.CNUCoinID|short(10) }}</td>
-                <td title="{{ w['From'] }}">{{ labels.get(w['From']) or w['From']|short(10) }}</td>
-                <td title="{{ w['To'] }}">{{ labels.get(w['To']) or w['To']|short(10) }}</td>
-                <td>{{ '%.2f'|format(w.TASum) }}</td>
-                <td class="small">{{ w.TADate }}</td>
-              </tr>
+    <div class="grid">
+      <div>
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title">Учасники <span class="count">{{ members|length }}</span></div>
+          </div>
+          <div class="panel-body flush">
+            <table class="tbl">
+              <thead>
+                <tr><th>Назва</th><th>ID</th><th>Тип</th><th style="text-align:right">Баланс</th></tr>
+              </thead>
+              <tbody>
+              {% for m in members %}
+                <tr>
+                  <td>
+                    <form method="post" action="/users/{{ m.id }}/label" accept-charset="utf-8" class="form inline-rename">
+                      <input type="text" name="label" value="{{ m.label or '' }}" placeholder="без назви" maxlength="40" />
+                      <button class="secondary" type="submit" title="Зберегти">✎</button>
+                    </form>
+                  </td>
+                  <td><span class="id-mono" title="{{ m.id }}">{{ m.id|short(14) }}</span></td>
+                  <td>
+                    {% if m.is_miner %}<span class="badge miner"><span class="b-dot"></span>miner</span>{% else %}<span class="badge user">user</span>{% endif %}
+                  </td>
+                  <td style="text-align:right"><span class="balance">{{ '%.2f'|format(m.balance) }}</span> <span class="small">CNC</span></td>
+                </tr>
+              {% else %}
+                <tr><td colspan="4" class="empty">Ще немає зареєстрованих учасників.</td></tr>
               {% endfor %}
-            </tbody>
-          </table>
-        </details>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title">Зареєструвати учасника</div>
+          </div>
+          <div class="panel-body">
+            <form method="post" action="/users" accept-charset="utf-8" class="form">
+              <input type="text" name="label" placeholder="Назва (напр. Alice)" maxlength="40" />
+              <label class="checkbox"><input type="checkbox" name="is_miner" /> майнер</label>
+              <input type="number" step="0.01" min="0" name="initial_balance" placeholder="Баланс" value="100" />
+              <button type="submit">Створити</button>
+            </form>
+            <div class="help">Генерує RSA-2048 ключі, обчислює <code style="color: var(--accent);">ID = MD5(PublicKey)</code>. Початковий баланс оформляється як автопідтверджена транзакція від <code style="color: var(--violet);">GENESIS</code>.</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title">Нова транзакція</div>
+          </div>
+          <div class="panel-body">
+            {% if members|length >= 2 %}
+            <form method="post" action="/transactions" class="form">
+              <select name="sender" required>
+                <option value="">Відправник…</option>
+                {% for m in members %}
+                  <option value="{{ m.id }}">{{ m.label or m.id|short(14) }} · {{ '%.2f'|format(m.balance) }} CNC</option>
+                {% endfor %}
+              </select>
+              <select name="recipient" required>
+                <option value="">Отримувач…</option>
+                {% for m in members %}
+                  <option value="{{ m.id }}">{{ m.label or m.id|short(14) }}</option>
+                {% endfor %}
+              </select>
+              <input type="number" step="0.01" min="0.01" name="amount" placeholder="Сума" required />
+              <button type="submit">Надіслати →</button>
+            </form>
+            {% else %}
+              <div class="muted">Потрібно щонайменше двох учасників.</div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title">Транзакції <span class="count">{{ transactions|length }}</span></div>
+          </div>
+          <div class="panel-body flush">
+            <table class="tbl">
+              <thead>
+                <tr><th>TAID</th><th>From → To</th><th>Сума</th><th>TAHash</th><th>Стан</th><th>Nonce</th><th></th></tr>
+              </thead>
+              <tbody>
+              {% for tx in transactions %}
+                <tr>
+                  <td><span class="id-mono dim">#{{ tx.TAID }}</span></td>
+                  <td>
+                    <span class="id-mono" title="{{ tx['From'] }}">{{ labels.get(tx['From']) or tx['From']|short(8) }}</span>
+                    <span class="arrow">→</span>
+                    <span class="id-mono" title="{{ tx['To'] }}">{{ labels.get(tx['To']) or tx['To']|short(8) }}</span>
+                  </td>
+                  <td><span class="balance">{{ '%.2f'|format(tx.TASum) }}</span></td>
+                  <td title="{{ tx.TAHash }}"><span class="hash">{{ tx.TAHash[:12] }}…</span></td>
+                  <td>
+                    {% if tx.status == "approved" %}
+                      <span class="badge ok"><span class="b-dot"></span>approved</span>
+                    {% elif tx.status == "mined" %}
+                      <span class="badge mined"><span class="b-dot"></span>mined</span>
+                    {% else %}
+                      <span class="badge pending"><span class="b-dot"></span>pending</span>
+                    {% endif %}
+                  </td>
+                  <td>{% if tx.Nonce %}<span class="id-mono">{{ tx.Nonce }}</span>{% else %}<span class="muted">—</span>{% endif %}</td>
+                  <td class="row-actions">
+                    <a href="/transactions/{{ tx.TAID }}/verify"><button class="ghost sm" type="button">Verify</button></a>
+                  </td>
+                </tr>
+              {% else %}
+                <tr><td colspan="7" class="empty">Транзакцій поки немає.</td></tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title">Блокчейн <span class="count">{{ blocks|length }}</span></div>
+          </div>
+          <div class="panel-body flush">
+            <table class="tbl">
+              <thead>
+                <tr><th>#</th><th>Miner</th><th>BlockHash</th><th>Nonce</th><th>TAID</th><th></th></tr>
+              </thead>
+              <tbody>
+              {% for b in blocks %}
+                <tr>
+                  <td><span class="id-mono dim">{{ b.BlockID }}</span></td>
+                  <td>
+                    {% if b.MinerID %}
+                      <span class="id-mono" title="{{ b.MinerID }}">{{ labels.get(b.MinerID) or b.MinerID|short(10) }}</span>
+                    {% else %}<span class="muted">—</span>{% endif %}
+                  </td>
+                  <td title="{{ b.BlockChainHash }}"><span class="hash green">{{ b.BlockChainHash[:14] }}…</span></td>
+                  <td class="id-mono">{{ b.Nonce }}</td>
+                  <td><span class="id-mono dim">#{{ b.TAID }}</span></td>
+                  <td><a href="/blocks/{{ b.BlockID }}/verify"><button class="ghost sm" type="button">Verify</button></a></td>
+                </tr>
+              {% else %}
+                <tr><td colspan="6" class="empty">Блоків ще немає.</td></tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-body">
+            <details>
+              <summary>Журнал гаманців ({{ wallet|length }})</summary>
+              <table class="tbl" style="margin-top: 10px;">
+                <thead><tr><th>Власник</th><th>From</th><th>To</th><th>Сума</th><th>Дата</th></tr></thead>
+                <tbody>
+                  {% for w in wallet %}
+                  <tr>
+                    <td><span class="id-mono" title="{{ w.CNUCoinID }}">{{ labels.get(w.CNUCoinID) or w.CNUCoinID|short(10) }}</span></td>
+                    <td><span class="id-mono dim" title="{{ w['From'] }}">{{ labels.get(w['From']) or w['From']|short(10) }}</span></td>
+                    <td><span class="id-mono dim" title="{{ w['To'] }}">{{ labels.get(w['To']) or w['To']|short(10) }}</span></td>
+                    <td><span class="balance">{{ '%.2f'|format(w.TASum) }}</span></td>
+                    <td class="small">{{ w.TADate }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </details>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
+
+    <div class="footer">CNUCoin · Лабораторна № 2 · Proof-of-Work · RSA-PSS sigs · MD5 chain</div>
+  </main>
 </body>
 </html>

@@ -2,329 +2,726 @@
 <html lang="uk">
 <head>
   <meta charset="utf-8" />
-  <title>Електронна залікова книжка — Blockchain</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GradeChain — Електронна залікова книжка</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0f1115;
-      --panel: #181b22;
-      --panel-2: #1f232c;
-      --line: #2a2f3a;
-      --text: #e6e8ee;
-      --muted: #8a93a6;
-      --accent: #f5a524;
-      --green: #2dd4bf;
-      --red: #f87171;
+      /* Surface */
+      --bg-base: #06080e;
+      --bg-grad-1: #0a0e1c;
+      --bg-grad-2: #07091a;
+      --panel: rgba(20, 26, 42, 0.62);
+      --panel-solid: #131826;
+      --panel-hover: rgba(28, 36, 56, 0.78);
+      --elev: #1a2238;
+      --line: rgba(124, 142, 184, 0.16);
+      --line-strong: rgba(124, 142, 184, 0.32);
+      /* Text */
+      --text: #ecf0fa;
+      --text-soft: #b8c1d6;
+      --muted: #6a7593;
+      /* Brand — project uses violet/cyan instead of orange */
+      --brand: #8b5cf6;
+      --brand-2: #6366f1;
+      --brand-glow: rgba(139, 92, 246, 0.45);
+      --cyan: #22d3ee;
+      --accent: #f59e0b;
+      --accent-2: #fb923c;
+      /* Status */
+      --green: #34d399;
+      --green-soft: rgba(52, 211, 153, 0.12);
+      --red: #fb7185;
+      --red-soft: rgba(251, 113, 133, 0.12);
       --blue: #60a5fa;
-      --purple: #a78bfa;
+      --violet: #a78bfa;
     }
     * { box-sizing: border-box; }
+    html, body { height: 100%; }
     body {
-      margin: 0; padding: 24px;
-      font-family: ui-monospace, Menlo, Consolas, monospace;
-      background: var(--bg); color: var(--text);
+      margin: 0;
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--text);
+      background:
+        radial-gradient(1200px 600px at 90% -10%, rgba(139, 92, 246, 0.10), transparent 60%),
+        radial-gradient(900px 500px at -10% 10%, rgba(34, 211, 238, 0.06), transparent 55%),
+        radial-gradient(700px 400px at 50% 110%, rgba(99, 102, 241, 0.05), transparent 60%),
+        linear-gradient(180deg, var(--bg-grad-1) 0%, var(--bg-base) 100%);
+      background-attachment: fixed;
+      -webkit-font-smoothing: antialiased;
     }
-    h1 { margin: 0 0 4px; font-size: 22px; letter-spacing: 0.5px; }
-    h2 { margin: 0 0 12px; font-size: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: 1.2px; }
-    .header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 24px; }
-    .grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 18px; }
-    @media (max-width: 1024px) { .grid { grid-template-columns: 1fr; } }
+    code, .mono { font-family: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace; }
+
+    /* ---------- Top bar ---------- */
+    .topbar {
+      position: sticky; top: 0; z-index: 50;
+      backdrop-filter: blur(14px);
+      background: rgba(8, 11, 22, 0.78);
+      border-bottom: 1px solid var(--line);
+    }
+    .topbar-inner {
+      max-width: 1360px; margin: 0 auto;
+      padding: 14px 28px;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .logo {
+      width: 40px; height: 40px; border-radius: 11px;
+      background: linear-gradient(135deg, var(--brand) 0%, var(--brand-2) 60%, var(--cyan) 130%);
+      display: grid; place-items: center;
+      box-shadow: 0 4px 18px -2px var(--brand-glow), inset 0 1px 0 rgba(255,255,255,0.25);
+      color: #fff; font-weight: 800; font-size: 19px;
+      letter-spacing: -0.05em;
+    }
+    .brand-text { line-height: 1.2; }
+    .brand-name {
+      font-weight: 700; font-size: 16px; letter-spacing: -0.015em;
+      background: linear-gradient(180deg, #fff 0%, #c8d1e6 100%);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .brand-sub { font-size: 11px; color: var(--muted); font-weight: 500; }
+    .topbar-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+    .chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 11px; border-radius: 999px;
+      background: rgba(28, 36, 56, 0.6);
+      border: 1px solid var(--line);
+      font-size: 11.5px; font-weight: 500; color: var(--text-soft);
+      transition: border-color .15s ease;
+    }
+    .chip.live { color: var(--green); border-color: rgba(52, 211, 153, 0.3); background: rgba(52, 211, 153, 0.06); }
+    .chip.live .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse-soft 2s ease-in-out infinite; }
+    @keyframes pulse-soft { 0%,100% { opacity: 1; } 50% { opacity: 0.55; } }
+    .chip a, a.chip-link { color: inherit; text-decoration: none; }
+    .chip:hover { border-color: var(--line-strong); }
+
+    main { max-width: 1360px; margin: 0 auto; padding: 28px; }
+
+    /* ---------- Hero ---------- */
+    .hero {
+      display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 16px;
+      margin-bottom: 24px;
+    }
+    .hero h1 {
+      margin: 0 0 8px; font-size: 32px; font-weight: 800; letter-spacing: -0.025em;
+      background: linear-gradient(180deg, #fff 0%, #b8c1d6 100%);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .hero h1 .accent {
+      background: linear-gradient(135deg, var(--brand) 0%, var(--cyan) 100%);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .hero-sub { color: var(--text-soft); font-size: 14px; max-width: 720px; line-height: 1.6; }
+    .hero-sub strong { color: var(--text); font-weight: 600; }
+
+    /* ---------- Stat cards ---------- */
+    .stats {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+      margin-bottom: 26px;
+    }
+    @media (max-width: 1000px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+    .stat {
+      position: relative; overflow: hidden;
+      padding: 18px 20px; border-radius: 14px;
+      background: linear-gradient(180deg, rgba(28, 36, 56, 0.55) 0%, rgba(20, 26, 42, 0.55) 100%);
+      border: 1px solid var(--line);
+      transition: border-color .2s ease, transform .2s ease;
+    }
+    .stat:hover { border-color: var(--line-strong); transform: translateY(-1px); }
+    .stat::before {
+      content: ""; position: absolute; inset: 0; border-radius: 14px; pointer-events: none;
+      background: radial-gradient(400px 80px at 50% -20%, rgba(139, 92, 246, 0.10), transparent 70%);
+    }
+    .stat-label {
+      font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .stat-label .ico { width: 14px; height: 14px; }
+    .stat-value { font-size: 28px; font-weight: 700; margin-top: 6px; letter-spacing: -0.025em; }
+    .stat-value .brand { background: linear-gradient(135deg, var(--brand) 0%, var(--cyan) 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .stat-value .green { color: var(--green); }
+    .stat-value .accent { color: var(--accent); }
+    .stat-value .red { color: var(--red); }
+    .stat-value .cyan { color: var(--cyan); }
+    .stat-foot { font-size: 11.5px; color: var(--muted); margin-top: 4px; }
+
+    /* ---------- Mining hero ---------- */
+    .mine-hero {
+      position: relative; overflow: hidden;
+      border-radius: 16px;
+      padding: 22px 24px;
+      margin-bottom: 26px;
+      background:
+        radial-gradient(800px 220px at 100% 0%, rgba(139, 92, 246, 0.18), transparent 60%),
+        radial-gradient(500px 200px at 0% 100%, rgba(34, 211, 238, 0.12), transparent 60%),
+        linear-gradient(180deg, rgba(24, 18, 40, 0.55) 0%, rgba(20, 26, 42, 0.6) 100%);
+      border: 1px solid rgba(139, 92, 246, 0.28);
+      box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.08), 0 18px 60px -24px rgba(139, 92, 246, 0.35);
+    }
+    .mine-hero::before {
+      content: ""; position: absolute; top: -1px; left: -1px; right: -1px; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.6), transparent);
+    }
+    .mine-head { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+    .mine-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: rgba(139, 92, 246, 0.18);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      display: grid; place-items: center; color: var(--violet); font-size: 17px;
+    }
+    .mine-title { font-weight: 700; font-size: 16px; color: #fff; letter-spacing: -0.01em; }
+    .mine-sub { font-size: 12px; color: var(--text-soft); margin-left: auto; }
+    .mine-sub strong { color: var(--violet); font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+    .pulse-dot {
+      display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+      background: #fff; margin-right: 8px;
+      animation: pulse-ring 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse-ring {
+      0%,100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.6); opacity: 1; }
+      50% { box-shadow: 0 0 0 8px rgba(255, 255, 255, 0); opacity: 0.7; }
+    }
+
+    /* ---------- Grid ---------- */
+    .grid { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 22px; }
+    @media (max-width: 1180px) { .grid { grid-template-columns: 1fr; } }
+
+    /* ---------- Panels ---------- */
     .panel {
       background: var(--panel);
       border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 16px 18px;
+      border-radius: 14px;
+      backdrop-filter: blur(10px);
       margin-bottom: 18px;
+      overflow: hidden;
+      transition: border-color .2s ease;
     }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    th, td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
-    th { color: var(--muted); font-weight: 500; text-transform: uppercase; font-size: 11px; letter-spacing: 0.8px; }
-    tr:last-child td { border-bottom: none; }
-    code { color: var(--accent); }
-    .muted { color: var(--muted); }
-    form { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-    input, select {
-      background: var(--panel-2); color: var(--text);
-      border: 1px solid var(--line); border-radius: 6px;
-      padding: 6px 10px; font: inherit; font-size: 13px;
+    .panel:hover { border-color: var(--line-strong); }
+    .panel.transcript {
+      border-color: rgba(139, 92, 246, 0.35);
+      background:
+        radial-gradient(600px 200px at 100% 0%, rgba(139, 92, 246, 0.10), transparent 70%),
+        var(--panel);
+      box-shadow: 0 18px 60px -28px rgba(139, 92, 246, 0.4);
     }
-    input[type=number] { width: 90px; }
+    .panel-head {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      padding: 14px 18px 12px;
+      border-bottom: 1px solid var(--line);
+    }
+    .panel-title { font-size: 12.5px; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.12em; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+    .panel-title .count { background: rgba(124, 142, 184, 0.18); color: var(--text-soft); padding: 2px 8px; border-radius: 999px; font-size: 11px; letter-spacing: 0; text-transform: none; font-weight: 600; }
+    .panel-title.brand-title {
+      background: linear-gradient(135deg, var(--violet) 0%, var(--cyan) 100%);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .panel-body { padding: 16px 18px 18px; }
+    .panel-body.flush { padding: 0; }
+
+    /* ---------- Tables ---------- */
+    .tbl { width: 100%; border-collapse: collapse; }
+    .tbl th, .tbl td {
+      padding: 11px 18px;
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+      font-size: 13px;
+      vertical-align: top;
+    }
+    .tbl th {
+      color: var(--muted); font-weight: 600; text-transform: uppercase; font-size: 10.5px; letter-spacing: 0.1em;
+      background: rgba(8, 11, 22, 0.5);
+    }
+    .tbl tr:last-child td { border-bottom: none; }
+    .tbl tbody tr { transition: background .15s ease; }
+    .tbl tbody tr:hover { background: rgba(124, 142, 184, 0.05); }
+    .tbl td.muted, .muted { color: var(--muted); }
+    .tbl .empty { text-align: center; padding: 28px; color: var(--muted); font-size: 13px; }
+
+    /* ---------- Form elements ---------- */
+    .form { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    input[type=text], input[type=number], select {
+      background: rgba(8, 11, 22, 0.65);
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 9px 12px;
+      font: inherit; font-size: 13px;
+      transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+      outline: none;
+    }
+    input[type=text]:focus, input[type=number]:focus, select:focus {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+    }
+    input[type=number] { width: 100px; }
+    input::placeholder { color: var(--muted); }
+    select { padding-right: 30px; appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%); background-position: calc(100% - 16px) 50%, calc(100% - 11px) 50%; background-size: 5px 5px, 5px 5px; background-repeat: no-repeat; }
+
     button {
-      background: var(--accent); color: #1a1300; border: 0;
-      padding: 6px 14px; border-radius: 6px; cursor: pointer; font: inherit; font-weight: 600; font-size: 12px;
+      background: linear-gradient(180deg, var(--brand) 0%, var(--brand-2) 100%);
+      color: #fff; border: 0;
+      padding: 9px 16px; border-radius: 8px;
+      cursor: pointer; font: inherit; font-weight: 600; font-size: 13px;
+      transition: transform .1s ease, box-shadow .15s ease, filter .15s ease;
+      box-shadow: 0 4px 14px -4px var(--brand-glow), inset 0 1px 0 rgba(255,255,255,0.18);
     }
-    button.secondary { background: var(--panel-2); color: var(--text); border: 1px solid var(--line); font-weight: 500; }
-    button.danger { background: var(--red); color: #2a0000; }
-    .badge { display: inline-block; padding: 1px 7px; border-radius: 999px; font-size: 11px; }
-    .badge.student { background: #16243d; color: var(--blue); }
-    .badge.teacher { background: #2a1f3d; color: var(--purple); }
-    .badge.registrar { background: #3a2a05; color: var(--accent); }
-    .badge.ok { background: #0d3d36; color: var(--green); }
-    .badge.pending { background: #3a1f1f; color: var(--red); }
-    .badge.mined { background: #3a2a05; color: var(--accent); }
-    .badge.A, .badge.B { background: #0d3d36; color: var(--green); }
-    .badge.C, .badge.D, .badge.E { background: #3a2a05; color: var(--accent); }
-    .badge.FX, .badge.F { background: #3a1f1f; color: var(--red); }
-    .flash { padding: 10px 14px; border-radius: 6px; margin-bottom: 18px; font-size: 13px; word-break: break-all; }
-    .flash.ok { background: #0d3d36; color: var(--green); border: 1px solid #135449; }
-    .flash.err { background: #3d1313; color: var(--red); border: 1px solid #5a1f1f; }
-    form.inline-rename { gap: 4px; }
-    form.inline-rename input { width: 130px; padding: 4px 8px; font-size: 12px; }
-    form.inline-rename button { padding: 4px 8px; font-size: 12px; }
-    .small { font-size: 11px; color: var(--muted); }
-    .mono { font-family: ui-monospace, Menlo, Consolas, monospace; }
-    summary { cursor: pointer; color: var(--muted); margin-bottom: 8px; }
-    .gpa { color: var(--green); font-weight: 600; font-size: 18px; }
-    .pill-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
-    .pill { padding: 4px 10px; border-radius: 999px; background: var(--panel-2); border: 1px solid var(--line); font-size: 12px; }
+    button:hover { filter: brightness(1.08); box-shadow: 0 6px 20px -4px var(--brand-glow), inset 0 1px 0 rgba(255,255,255,0.18); }
+    button:active { transform: translateY(1px); }
+    button.secondary {
+      background: rgba(28, 36, 56, 0.7); color: var(--text-soft);
+      border: 1px solid var(--line);
+      font-weight: 500; box-shadow: none;
+    }
+    button.secondary:hover { background: var(--panel-hover); color: var(--text); border-color: var(--line-strong); filter: none; }
+    button.ghost { background: transparent; border: 1px solid var(--line); color: var(--text-soft); box-shadow: none; }
+    button.ghost:hover { background: rgba(28, 36, 56, 0.5); color: var(--text); filter: none; }
+    button.danger {
+      background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%);
+      color: #fff;
+      box-shadow: 0 4px 12px -4px rgba(239, 68, 68, 0.45), inset 0 1px 0 rgba(255,255,255,0.15);
+    }
+    button.mine-big {
+      padding: 11px 22px; font-size: 14px; font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+    button.sm { padding: 6px 10px; font-size: 12px; border-radius: 7px; }
     a.linkbtn { text-decoration: none; }
+
+    /* ---------- Badges ---------- */
+    .badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 9px; border-radius: 999px;
+      font-size: 11px; font-weight: 600; letter-spacing: 0.02em;
+      border: 1px solid transparent;
+    }
+    .badge .b-dot { width: 5px; height: 5px; border-radius: 50%; }
+
+    /* Role badges */
+    .badge.student { background: rgba(96, 165, 250, 0.12); color: var(--blue); border-color: rgba(96, 165, 250, 0.28); }
+    .badge.teacher { background: rgba(139, 92, 246, 0.12); color: var(--violet); border-color: rgba(139, 92, 246, 0.28); }
+    .badge.registrar { background: rgba(245, 158, 11, 0.12); color: var(--accent); border-color: rgba(245, 158, 11, 0.28); }
+
+    /* Status badges */
+    .badge.ok { background: var(--green-soft); color: var(--green); border-color: rgba(52, 211, 153, 0.3); }
+    .badge.ok .b-dot { background: var(--green); box-shadow: 0 0 6px var(--green); }
+    .badge.pending { background: rgba(251, 113, 133, 0.1); color: var(--red); border-color: rgba(251, 113, 133, 0.28); }
+    .badge.pending .b-dot { background: var(--red); animation: pulse 1.6s ease-in-out infinite; }
+    .badge.mined { background: rgba(245, 158, 11, 0.1); color: var(--accent); border-color: rgba(245, 158, 11, 0.25); }
+    .badge.mined .b-dot { background: var(--accent); animation: pulse 1.6s ease-in-out infinite; }
+
+    /* ECTS letter badges */
+    .badge.A { background: rgba(52, 211, 153, 0.18); color: var(--green); border-color: rgba(52, 211, 153, 0.35); }
+    .badge.B { background: rgba(52, 211, 153, 0.12); color: var(--green); border-color: rgba(52, 211, 153, 0.28); }
+    .badge.C { background: rgba(34, 211, 238, 0.12); color: var(--cyan); border-color: rgba(34, 211, 238, 0.28); }
+    .badge.D { background: rgba(245, 158, 11, 0.12); color: var(--accent); border-color: rgba(245, 158, 11, 0.28); }
+    .badge.E { background: rgba(245, 158, 11, 0.16); color: var(--accent); border-color: rgba(245, 158, 11, 0.32); }
+    .badge.FX, .badge.F { background: rgba(251, 113, 133, 0.14); color: var(--red); border-color: rgba(251, 113, 133, 0.32); }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+    /* ---------- Hash / ID display ---------- */
+    .hash {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 12px; color: var(--violet);
+      padding: 2px 7px; border-radius: 5px;
+      background: rgba(139, 92, 246, 0.08);
+      border: 1px solid rgba(139, 92, 246, 0.18);
+      transition: background .15s ease;
+    }
+    .hash:hover { background: rgba(139, 92, 246, 0.16); }
+    .hash.green { color: var(--green); background: rgba(52, 211, 153, 0.07); border-color: rgba(52, 211, 153, 0.18); }
+    .id-mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-soft); }
+    .id-mono.dim { color: var(--muted); }
+
+    /* ---------- Flash ---------- */
+    .flash {
+      padding: 12px 16px; border-radius: 10px; margin-bottom: 18px; font-size: 13px;
+      display: flex; align-items: center; gap: 10px;
+      animation: slide-in .25s ease;
+      word-break: break-word;
+    }
+    @keyframes slide-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+    .flash.ok { background: linear-gradient(180deg, rgba(52, 211, 153, 0.1), rgba(52, 211, 153, 0.04)); color: var(--green); border: 1px solid rgba(52, 211, 153, 0.25); }
+    .flash.err { background: linear-gradient(180deg, rgba(251, 113, 133, 0.1), rgba(251, 113, 133, 0.04)); color: var(--red); border: 1px solid rgba(251, 113, 133, 0.25); }
+
+    /* ---------- Inline rename ---------- */
+    .inline-rename { gap: 4px; }
+    .inline-rename input { padding: 5px 9px; font-size: 12.5px; width: 150px; }
+    .inline-rename button { padding: 5px 9px; font-size: 12px; }
+
+    /* ---------- Transcript ---------- */
+    .gpa-card {
+      display: flex; align-items: center; gap: 16px;
+      padding: 16px 18px;
+      border-radius: 12px;
+      background:
+        radial-gradient(400px 120px at 0% 0%, rgba(139, 92, 246, 0.12), transparent 60%),
+        rgba(8, 11, 22, 0.5);
+      border: 1px solid var(--line);
+      margin-bottom: 16px;
+    }
+    .gpa-card.empty { color: var(--muted); justify-content: center; padding: 22px; font-style: italic; }
+    .gpa-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 38px; font-weight: 700; letter-spacing: -0.02em;
+      background: linear-gradient(135deg, var(--green) 0%, var(--cyan) 100%);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      line-height: 1;
+    }
+    .gpa-meta { display: flex; flex-direction: column; gap: 4px; }
+    .gpa-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; }
+    .gpa-letter { font-size: 14px; font-weight: 600; }
+    .student-meta {
+      margin-left: auto; text-align: right;
+      font-size: 13px; color: var(--text-soft);
+    }
+    .student-meta .small { font-size: 11px; color: var(--muted); }
+
+    /* ---------- Pills row ---------- */
+    .pill-row { display: flex; gap: 8px; flex-wrap: wrap; padding: 12px 18px 4px; }
+    .pill {
+      padding: 5px 12px; border-radius: 999px;
+      background: rgba(8, 11, 22, 0.5);
+      border: 1px solid var(--line);
+      font-size: 11.5px; color: var(--text-soft); font-weight: 500;
+    }
+    .pill strong { color: var(--text); font-weight: 600; }
+
+    /* ---------- Misc ---------- */
+    .small { font-size: 11.5px; color: var(--muted); }
+    .help { margin-top: 12px; padding: 10px 12px; border-radius: 8px; background: rgba(8, 11, 22, 0.5); border: 1px solid var(--line); font-size: 12px; color: var(--text-soft); line-height: 1.6; }
+    .help code { color: var(--violet); font-size: 11.5px; }
+    .footer { margin-top: 36px; padding: 18px 0; text-align: center; color: var(--muted); font-size: 12px; border-top: 1px solid var(--line); }
+    .footer strong { color: var(--text-soft); }
   </style>
 </head>
 <body>
-  <div class="header">
-    <div>
-      <h1>Електронна залікова книжка</h1>
-      <div class="muted">Проєкт «Використання блокчейн» — Варіант №4</div>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="logo">⬢</div>
+        <div class="brand-text">
+          <div class="brand-name">GradeChain</div>
+          <div class="brand-sub">Електронна залікова книжка · Variant 4</div>
+        </div>
+      </div>
+      <div class="topbar-meta">
+        <span class="chip live"><span class="dot"></span> Chain live</span>
+        <span class="chip">RSA-PSS · MD5 · PoW</span>
+        <a class="linkbtn" href="/chain/verify"><button class="secondary sm" type="button">✓ Verify chain</button></a>
+        <form method="post" action="/reset" onsubmit="return confirm('Очистити всю базу даних?');">
+          <button class="ghost sm" type="submit">Reset</button>
+        </form>
+      </div>
     </div>
-    <div style="display:flex; gap: 8px;">
-      <a class="linkbtn" href="/chain/verify"><button class="secondary" type="button">✓ Перевірити ланцюг</button></a>
-      <form method="post" action="/reset" onsubmit="return confirm('Очистити всю базу даних?');">
-        <button class="danger" type="submit">Reset</button>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div>
+        <h1>Залікова книжка на <span class="accent">блокчейні</span></h1>
+        <div class="hero-sub">Викладачі підписують оцінки RSA-ключем, реєстратори підтверджують їх через <strong>Proof-of-Work</strong>. Кожен новий блок збільшує вартість підробки попередніх записів — щоб переписати одну оцінку, треба перерахувати весь хвіст ланцюга. У блоці лежить не транзакція, а академічна оцінка.</div>
+      </div>
+    </section>
+
+    <section class="stats">
+      <div class="stat">
+        <div class="stat-label">Учасники</div>
+        <div class="stat-value">{{ members|length }}</div>
+        <div class="stat-foot">{{ students|length }} студ · {{ teachers|length }} викл · {{ registrars|length }} реєстр</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Дисципліни</div>
+        <div class="stat-value"><span class="cyan">{{ courses|length }}</span></div>
+        <div class="stat-foot">у реєстрі курсів</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Оцінки</div>
+        <div class="stat-value">{{ grades|length }}</div>
+        <div class="stat-foot">{% if pending_count > 0 %}<span style="color: var(--red)">{{ pending_count }} pending</span>{% else %}<span style="color: var(--green)">всі підтверджені</span>{% endif %}</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Блокчейн</div>
+        <div class="stat-value"><span class="brand">{{ blocks|length }}</span></div>
+        <div class="stat-foot">довжина ланцюга · difficulty {{ difficulty }}</div>
+      </div>
+    </section>
+
+    <section class="mine-hero">
+      <div class="mine-head">
+        <div class="mine-icon">⛏</div>
+        <div class="mine-title">Підтвердження оцінок · Proof-of-Work</div>
+        <div class="mine-sub">target: MD5 починається з <strong>{{ '0' * difficulty }}</strong></div>
+      </div>
+      {% if registrars and pending_count > 0 %}
+      <form method="post" action="/mine" class="form">
+        <select name="registrar_id" required>
+          <option value="">Реєстратор…</option>
+          {% for r in registrars %}<option value="{{ r.MemberID }}">{{ r.Label }}</option>{% endfor %}
+        </select>
+        <label style="display: inline-flex; gap: 8px; align-items: center; background: rgba(8,11,22,0.5); padding: 6px 12px; border-radius: 8px; border: 1px solid var(--line);">
+          <span style="color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em;">Difficulty</span>
+          <input type="number" name="difficulty" value="{{ difficulty }}" min="1" max="6" style="width:60px; padding: 4px 8px;" />
+        </label>
+        <button class="mine-big" type="submit"><span class="pulse-dot"></span>Підтвердити наступну ({{ pending_count }})</button>
       </form>
-    </div>
-  </div>
-
-  <div class="panel" style="border-color: var(--accent);">
-    <h2>⛏ Підтвердження оцінок (майнінг)</h2>
-    {% if registrars and pending_count > 0 %}
-    <form method="post" action="/mine">
-      <select name="registrar_id" required>
-        <option value="">Реєстратор…</option>
-        {% for r in registrars %}<option value="{{ r.MemberID }}">{{ r.Label }}</option>{% endfor %}
-      </select>
-      <label class="small">Difficulty:
-        <input type="number" name="difficulty" value="{{ difficulty }}" min="1" max="6" style="width:60px;" />
-      </label>
-      <button type="submit">⛏ Підтвердити наступну ({{ pending_count }})</button>
-    </form>
-    <div class="small" style="margin-top:8px">
-      Бере найстарішу непідтверджену оцінку та шукає Nonce, при якому MD5(GradeHash || prev_BlockHash || Nonce)
-      починається з {{ difficulty }} нуля(-ів). PoW з ланцюговим звʼязком робить ретроактивну зміну
-      оцінок обчислювально дорогою.
-    </div>
-    {% elif not registrars %}
-      <div class="muted">Немає зареєстрованих реєстраторів. Зареєструйте учасника з роллю «registrar».</div>
-    {% else %}
-      <div class="muted">Немає оцінок, що очікують підтвердження.</div>
-    {% endif %}
-  </div>
-
-  {% if message %}<div class="flash ok">{{ message }}</div>{% endif %}
-  {% if error %}<div class="flash err">{{ error }}</div>{% endif %}
-
-  <div class="grid">
-    <div>
-      <div class="panel">
-        <h2>Учасники ({{ members|length }})</h2>
-        <div class="pill-row">
-          <span class="pill">студентів: {{ students|length }}</span>
-          <span class="pill">викладачів: {{ teachers|length }}</span>
-          <span class="pill">реєстраторів: {{ registrars|length }}</span>
-        </div>
-        <table>
-          <thead>
-            <tr><th>ПІБ</th><th>Роль</th><th>Група</th><th>ID</th><th></th></tr>
-          </thead>
-          <tbody>
-          {% for m in members %}
-            <tr>
-              <td>
-                <form method="post" action="/members/{{ m.MemberID }}/label" accept-charset="utf-8" class="inline-rename">
-                  <input type="text" name="label" value="{{ m.Label }}" maxlength="80" />
-                  <button class="secondary" type="submit" title="Перейменувати">✎</button>
-                </form>
-              </td>
-              <td><span class="badge {{ m.Role }}">{{ m.Role }}</span></td>
-              <td>{{ m.GroupCode or '—' }}</td>
-              <td><code title="{{ m.MemberID }}">{{ m.MemberID|short(10) }}</code></td>
-              <td>
-                {% if m.Role == 'student' %}
-                  <a class="linkbtn" href="/?student_id={{ m.MemberID }}"><button class="secondary" type="button">📖 Транскрипт</button></a>
-                {% endif %}
-              </td>
-            </tr>
-          {% else %}
-            <tr><td colspan="5" class="muted">Ще немає зареєстрованих учасників.</td></tr>
-          {% endfor %}
-          </tbody>
-        </table>
-      </div>
-
-      <div class="panel">
-        <h2>Зареєструвати учасника</h2>
-        <form method="post" action="/members" accept-charset="utf-8">
-          <input type="text" name="label" placeholder="ПІБ (напр. Петренко І.О.)" maxlength="80" required style="min-width:200px;" />
-          <select name="role" required>
-            <option value="student">student</option>
-            <option value="teacher">teacher</option>
-            <option value="registrar">registrar</option>
-          </select>
-          <input type="text" name="group_code" placeholder="Група (для студентів)" maxlength="20" />
-          <button type="submit">Створити</button>
-        </form>
-        <div class="small" style="margin-top:8px">
-          Згенерує RSA-2048 ключі, MemberID = MD5(PublicKey). Лише учасники з роллю «teacher»
-          можуть підписувати оцінки; лише «registrar» — підтверджувати їх через PoW.
-        </div>
-      </div>
-
-      <div class="panel">
-        <h2>Дисципліни ({{ courses|length }})</h2>
-        <table>
-          <thead>
-            <tr><th>#</th><th>Назва</th><th>Кред.</th><th>Сем.</th></tr>
-          </thead>
-          <tbody>
-          {% for c in courses %}
-            <tr>
-              <td>{{ c.CourseID }}</td>
-              <td>{{ c.Name }}</td>
-              <td>{{ '%.1f'|format(c.Credits) }}</td>
-              <td>{{ c.Semester }}</td>
-            </tr>
-          {% else %}
-            <tr><td colspan="4" class="muted">Дисциплін поки немає.</td></tr>
-          {% endfor %}
-          </tbody>
-        </table>
-        <form method="post" action="/courses" accept-charset="utf-8" style="margin-top:12px;">
-          <input type="text" name="name" placeholder="Назва дисципліни" maxlength="120" required style="min-width:200px;" />
-          <input type="number" step="0.5" min="0.5" name="credits" placeholder="Кредити" value="3" />
-          <input type="number" min="1" max="12" name="semester" placeholder="Семестр" value="1" />
-          <button type="submit">+ Додати</button>
-        </form>
-      </div>
-
-      <div class="panel">
-        <h2>Виставити оцінку</h2>
-        {% if teachers and students and courses %}
-        <form method="post" action="/grades" accept-charset="utf-8">
-          <select name="teacher_id" required>
-            <option value="">Викладач…</option>
-            {% for t in teachers %}<option value="{{ t.MemberID }}">{{ t.Label }}</option>{% endfor %}
-          </select>
-          <select name="student_id" required>
-            <option value="">Студент…</option>
-            {% for s in students %}<option value="{{ s.MemberID }}">{{ s.Label }}{% if s.GroupCode %} ({{ s.GroupCode }}){% endif %}</option>{% endfor %}
-          </select>
-          <select name="course_id" required>
-            <option value="">Дисципліна…</option>
-            {% for c in courses %}<option value="{{ c.CourseID }}">{{ c.Name }}</option>{% endfor %}
-          </select>
-          <input type="number" min="0" max="100" name="mark" placeholder="Бал (0–100)" required />
-          <input type="text" name="comment" placeholder="Коментар (необовʼязково)" maxlength="200" style="min-width:160px;" />
-          <button type="submit">Підписати та надіслати</button>
-        </form>
-        <div class="small" style="margin-top:8px">
-          Викладач підписує запис своїм приватним ключем (RSA-PSS + SHA-256). Запис очікує підтвердження
-          реєстратором перед тим, як зʼявиться у транскрипті студента.
-        </div>
-        {% else %}
-          <div class="muted">Потрібні щонайменше 1 викладач, 1 студент та 1 дисципліна.</div>
-        {% endif %}
-      </div>
-    </div>
-
-    <div>
-      {% if selected_student %}
-      <div class="panel" style="border-color: var(--blue);">
-        <h2>📖 Транскрипт: {{ selected_student.Label }}{% if selected_student.GroupCode %} · {{ selected_student.GroupCode }}{% endif %}</h2>
-        {% if selected_gpa is not none %}
-          <div style="margin-bottom: 12px;">
-            Середній бал (зважений за кредитами):
-            <span class="gpa">{{ '%.2f'|format(selected_gpa) }}</span>
-            <span class="badge {{ selected_gpa|int|letter }}">{{ selected_gpa|int|letter }}</span>
-          </div>
-        {% else %}
-          <div class="muted" style="margin-bottom:12px;">Поки немає підтверджених оцінок.</div>
-        {% endif %}
-        <table>
-          <thead>
-            <tr><th>Семестр</th><th>Дисципліна</th><th>Кред.</th><th>Бал</th><th>ECTS</th><th>Викладач</th><th>Стан</th></tr>
-          </thead>
-          <tbody>
-          {% for g in selected_transcript %}
-            <tr>
-              <td>{{ g.Semester }}</td>
-              <td>{{ g.CourseName }}</td>
-              <td>{{ '%.1f'|format(g.Credits) }}</td>
-              <td>{{ g.Mark }}</td>
-              <td><span class="badge {{ g.Letter }}">{{ g.Letter }}</span></td>
-              <td>{{ g.TeacherLabel }}</td>
-              <td>
-                {% if g.Approved %}<span class="badge ok">approved</span>
-                {% else %}<span class="badge pending">pending</span>{% endif %}
-              </td>
-            </tr>
-          {% else %}
-            <tr><td colspan="7" class="muted">Жодних записів.</td></tr>
-          {% endfor %}
-          </tbody>
-        </table>
-        <div style="margin-top:8px;"><a class="linkbtn" href="/"><button class="secondary" type="button">← На головну</button></a></div>
-      </div>
+      <div class="help">Бере найстарішу непідтверджену оцінку та шукає Nonce, при якому <code>MD5(GradeHash || prev_BlockHash || Nonce)</code> починається з {{ difficulty }} нуля(-ів). Через ланцюговий звʼязок переписати оцінку — означає перерахувати всі блоки після неї, тож підробка стає невигідною.</div>
+      {% elif not registrars %}
+      <div class="muted" style="padding: 8px 0;">⚠ Немає зареєстрованих реєстраторів. Зареєструйте учасника з роллю «registrar».</div>
+      {% else %}
+      <div class="muted" style="padding: 8px 0; display: flex; align-items: center; gap: 8px;"><span style="color: var(--green); font-size: 16px;">✓</span> Усі оцінки підтверджені — черга порожня.</div>
       {% endif %}
+    </section>
 
-      <div class="panel">
-        <h2>Оцінки ({{ grades|length }})</h2>
-        <table>
-          <thead>
-            <tr><th>#</th><th>Студент</th><th>Дисципліна</th><th>Бал</th><th>Викладач</th><th>Стан</th><th></th></tr>
-          </thead>
-          <tbody>
-          {% for g in grades %}
-            <tr>
-              <td>#{{ g.GradeID }}</td>
-              <td title="{{ g.StudentID }}">{{ labels.get(g.StudentID, g.StudentID|short(10)) }}</td>
-              <td>{{ course_map.get(g.CourseID, {}).get('Name', '?') }}</td>
-              <td>{{ g.Mark }} <span class="badge {{ g.letter }}">{{ g.letter }}</span></td>
-              <td title="{{ g.TeacherID }}">{{ labels.get(g.TeacherID, g.TeacherID|short(10)) }}</td>
-              <td>
-                {% if g.status == "approved" %}<span class="badge ok">approved</span>
-                {% elif g.status == "mined" %}<span class="badge mined">mined</span>
-                {% else %}<span class="badge pending">pending</span>{% endif %}
-              </td>
-              <td><a class="linkbtn" href="/grades/{{ g.GradeID }}/verify"><button class="secondary" type="button">Verify</button></a></td>
-            </tr>
-          {% else %}
-            <tr><td colspan="7" class="muted">Оцінок поки немає.</td></tr>
-          {% endfor %}
-          </tbody>
-        </table>
+    {% if message %}<div class="flash ok"><span>✓</span><span>{{ message }}</span></div>{% endif %}
+    {% if error %}<div class="flash err"><span>!</span><span>{{ error }}</span></div>{% endif %}
+
+    <div class="grid">
+      <div>
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title">Учасники <span class="count">{{ members|length }}</span></div>
+          </div>
+          <div class="pill-row">
+            <span class="pill">студентів: <strong>{{ students|length }}</strong></span>
+            <span class="pill">викладачів: <strong>{{ teachers|length }}</strong></span>
+            <span class="pill">реєстраторів: <strong>{{ registrars|length }}</strong></span>
+          </div>
+          <div class="panel-body flush">
+            <table class="tbl">
+              <thead>
+                <tr><th>ПІБ</th><th>Роль</th><th>Група</th><th>ID</th><th></th></tr>
+              </thead>
+              <tbody>
+              {% for m in members %}
+                <tr>
+                  <td>
+                    <form method="post" action="/members/{{ m.MemberID }}/label" accept-charset="utf-8" class="form inline-rename">
+                      <input type="text" name="label" value="{{ m.Label }}" maxlength="80" />
+                      <button class="secondary" type="submit" title="Перейменувати">✎</button>
+                    </form>
+                  </td>
+                  <td><span class="badge {{ m.Role }}">{{ m.Role }}</span></td>
+                  <td>{% if m.GroupCode %}<span style="color: var(--text-soft); font-size: 12.5px;">{{ m.GroupCode }}</span>{% else %}<span class="muted">—</span>{% endif %}</td>
+                  <td><span class="id-mono" title="{{ m.MemberID }}">{{ m.MemberID|short(10) }}</span></td>
+                  <td>
+                    {% if m.Role == 'student' %}
+                      <a class="linkbtn" href="/?student_id={{ m.MemberID }}"><button class="secondary sm" type="button">📖 Заліковка</button></a>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% else %}
+                <tr><td colspan="5" class="empty">Ще немає зареєстрованих учасників.</td></tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title">Зареєструвати учасника</div>
+          </div>
+          <div class="panel-body">
+            <form method="post" action="/members" accept-charset="utf-8" class="form">
+              <input type="text" name="label" placeholder="ПІБ (напр. Петренко І.О.)" maxlength="80" required style="min-width:220px;" />
+              <select name="role" required>
+                <option value="student">student</option>
+                <option value="teacher">teacher</option>
+                <option value="registrar">registrar</option>
+              </select>
+              <input type="text" name="group_code" placeholder="Група (для студентів)" maxlength="20" />
+              <button type="submit">Створити</button>
+            </form>
+            <div class="help">Генерує RSA-2048 ключі, <code>MemberID = MD5(PublicKey)</code>. Лише <code>teacher</code> можуть підписувати оцінки; лише <code>registrar</code> — підтверджувати їх через PoW.</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title">Дисципліни <span class="count">{{ courses|length }}</span></div>
+          </div>
+          <div class="panel-body flush">
+            <table class="tbl">
+              <thead>
+                <tr><th>#</th><th>Назва</th><th style="text-align:right">Кред.</th><th style="text-align:right">Сем.</th></tr>
+              </thead>
+              <tbody>
+              {% for c in courses %}
+                <tr>
+                  <td><span class="id-mono dim">{{ c.CourseID }}</span></td>
+                  <td>{{ c.Name }}</td>
+                  <td style="text-align:right" class="mono">{{ '%.1f'|format(c.Credits) }}</td>
+                  <td style="text-align:right" class="mono">{{ c.Semester }}</td>
+                </tr>
+              {% else %}
+                <tr><td colspan="4" class="empty">Дисциплін поки немає.</td></tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div class="panel-body">
+            <form method="post" action="/courses" accept-charset="utf-8" class="form">
+              <input type="text" name="name" placeholder="Назва дисципліни" maxlength="120" required style="min-width:220px;" />
+              <input type="number" step="0.5" min="0.5" name="credits" placeholder="Кредити" value="3" />
+              <input type="number" min="1" max="12" name="semester" placeholder="Семестр" value="1" />
+              <button type="submit">+ Додати</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title">Виставити оцінку</div>
+          </div>
+          <div class="panel-body">
+            {% if teachers and students and courses %}
+            <form method="post" action="/grades" accept-charset="utf-8" class="form">
+              <select name="teacher_id" required>
+                <option value="">Викладач…</option>
+                {% for t in teachers %}<option value="{{ t.MemberID }}">{{ t.Label }}</option>{% endfor %}
+              </select>
+              <select name="student_id" required>
+                <option value="">Студент…</option>
+                {% for s in students %}<option value="{{ s.MemberID }}">{{ s.Label }}{% if s.GroupCode %} · {{ s.GroupCode }}{% endif %}</option>{% endfor %}
+              </select>
+              <select name="course_id" required>
+                <option value="">Дисципліна…</option>
+                {% for c in courses %}<option value="{{ c.CourseID }}">{{ c.Name }}</option>{% endfor %}
+              </select>
+              <input type="number" min="0" max="100" name="mark" placeholder="Бал" required />
+              <input type="text" name="comment" placeholder="Коментар (необовʼязково)" maxlength="200" style="min-width:180px;" />
+              <button type="submit">Підписати →</button>
+            </form>
+            <div class="help">Викладач підписує запис своїм приватним ключем (<code>RSA-PSS + SHA-256</code>). У заліковку студента оцінка потрапляє лише після того, як реєстратор підтвердить її через PoW.</div>
+            {% else %}
+              <div class="muted">Потрібні щонайменше 1 викладач, 1 студент та 1 дисципліна.</div>
+            {% endif %}
+          </div>
+        </div>
       </div>
 
-      <div class="panel">
-        <h2>Блокчейн ({{ blocks|length }})</h2>
-        <table>
-          <thead>
-            <tr><th>#</th><th>Реєстратор</th><th>BlockHash</th><th>Nonce</th><th>GradeID</th><th></th></tr>
-          </thead>
-          <tbody>
-          {% for b in blocks %}
-            <tr>
-              <td>{{ b.BlockID }}</td>
-              <td title="{{ b.RegistrarID }}">{{ labels.get(b.RegistrarID, b.RegistrarID|short(10) if b.RegistrarID else '—') }}</td>
-              <td title="{{ b.BlockHash }}"><code>{{ b.BlockHash[:14] }}…</code></td>
-              <td>{{ b.Nonce }}</td>
-              <td>#{{ b.GradeID }}</td>
-              <td><a class="linkbtn" href="/blocks/{{ b.BlockID }}/verify"><button class="secondary" type="button">Verify</button></a></td>
-            </tr>
-          {% else %}
-            <tr><td colspan="6" class="muted">Блоків ще немає.</td></tr>
-          {% endfor %}
-          </tbody>
-        </table>
+      <div>
+        {% if selected_student %}
+        <div class="panel transcript">
+          <div class="panel-head">
+            <div class="panel-title brand-title">📖 Виписка успішності</div>
+            <a class="linkbtn" href="/"><button class="ghost sm" type="button">← На головну</button></a>
+          </div>
+          <div class="panel-body">
+            <div class="gpa-card {% if selected_gpa is none %}empty{% endif %}">
+              {% if selected_gpa is not none %}
+                <div class="gpa-num">{{ '%.2f'|format(selected_gpa) }}</div>
+                <div class="gpa-meta">
+                  <span class="gpa-label">GPA · зважений</span>
+                  <span class="gpa-letter"><span class="badge {{ selected_gpa|int|letter }}">{{ selected_gpa|int|letter }}</span> ECTS</span>
+                </div>
+                <div class="student-meta">
+                  <div style="font-weight: 600; color: var(--text); font-size: 14px;">{{ selected_student.Label }}</div>
+                  <div class="small">{% if selected_student.GroupCode %}група {{ selected_student.GroupCode }} · {% endif %}<span class="id-mono">{{ selected_student.MemberID|short(10) }}</span></div>
+                </div>
+              {% else %}
+                Поки немає підтверджених оцінок для {{ selected_student.Label }}.
+              {% endif %}
+            </div>
+            <table class="tbl" style="border-top: 1px solid var(--line);">
+              <thead>
+                <tr><th>Сем.</th><th>Дисципліна</th><th style="text-align:right">Кред.</th><th style="text-align:right">Бал</th><th>ECTS</th><th>Викладач</th><th>Стан</th></tr>
+              </thead>
+              <tbody>
+              {% for g in selected_transcript %}
+                <tr>
+                  <td class="mono">{{ g.Semester }}</td>
+                  <td>{{ g.CourseName }}</td>
+                  <td style="text-align:right" class="mono">{{ '%.1f'|format(g.Credits) }}</td>
+                  <td style="text-align:right" class="mono" style="font-weight: 600;">{{ g.Mark }}</td>
+                  <td><span class="badge {{ g.Letter }}">{{ g.Letter }}</span></td>
+                  <td style="font-size: 12.5px;">{{ g.TeacherLabel }}</td>
+                  <td>
+                    {% if g.Approved %}<span class="badge ok"><span class="b-dot"></span>approved</span>
+                    {% else %}<span class="badge pending"><span class="b-dot"></span>pending</span>{% endif %}
+                  </td>
+                </tr>
+              {% else %}
+                <tr><td colspan="7" class="empty">Жодних записів.</td></tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title">Оцінки <span class="count">{{ grades|length }}</span></div>
+          </div>
+          <div class="panel-body flush">
+            <table class="tbl">
+              <thead>
+                <tr><th>#</th><th>Студент</th><th>Дисципліна</th><th>Бал</th><th>Викладач</th><th>Стан</th><th></th></tr>
+              </thead>
+              <tbody>
+              {% for g in grades %}
+                <tr>
+                  <td><span class="id-mono dim">#{{ g.GradeID }}</span></td>
+                  <td style="font-size: 12.5px;" title="{{ g.StudentID }}">{{ labels.get(g.StudentID, g.StudentID|short(10)) }}</td>
+                  <td style="font-size: 12.5px;">{{ course_map.get(g.CourseID, {}).get('Name', '?') }}</td>
+                  <td>
+                    <span class="mono" style="font-weight: 600;">{{ g.Mark }}</span>
+                    <span class="badge {{ g.letter }}">{{ g.letter }}</span>
+                  </td>
+                  <td style="font-size: 12.5px;" title="{{ g.TeacherID }}">{{ labels.get(g.TeacherID, g.TeacherID|short(10)) }}</td>
+                  <td>
+                    {% if g.status == "approved" %}<span class="badge ok"><span class="b-dot"></span>approved</span>
+                    {% elif g.status == "mined" %}<span class="badge mined"><span class="b-dot"></span>mined</span>
+                    {% else %}<span class="badge pending"><span class="b-dot"></span>pending</span>{% endif %}
+                  </td>
+                  <td><a class="linkbtn" href="/grades/{{ g.GradeID }}/verify"><button class="ghost sm" type="button">Verify</button></a></td>
+                </tr>
+              {% else %}
+                <tr><td colspan="7" class="empty">Оцінок поки немає.</td></tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title">Блокчейн <span class="count">{{ blocks|length }}</span></div>
+          </div>
+          <div class="panel-body flush">
+            <table class="tbl">
+              <thead>
+                <tr><th>#</th><th>Реєстратор</th><th>BlockHash</th><th>Nonce</th><th>GradeID</th><th></th></tr>
+              </thead>
+              <tbody>
+              {% for b in blocks %}
+                <tr>
+                  <td><span class="id-mono dim">{{ b.BlockID }}</span></td>
+                  <td style="font-size: 12.5px;" title="{{ b.RegistrarID }}">{{ labels.get(b.RegistrarID, b.RegistrarID|short(10) if b.RegistrarID else '—') }}</td>
+                  <td title="{{ b.BlockHash }}"><span class="hash green">{{ b.BlockHash[:14] }}…</span></td>
+                  <td class="id-mono">{{ b.Nonce }}</td>
+                  <td><span class="id-mono dim">#{{ b.GradeID }}</span></td>
+                  <td><a class="linkbtn" href="/blocks/{{ b.BlockID }}/verify"><button class="ghost sm" type="button">Verify</button></a></td>
+                </tr>
+              {% else %}
+                <tr><td colspan="6" class="empty">Блоків ще немає.</td></tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
+
+    <div class="footer">
+      <strong>GradeChain</strong> · Проєкт «Використання блокчейн», Варіант №4 · RSA-PSS · MD5 · Proof-of-Work
+    </div>
+  </main>
 </body>
 </html>
